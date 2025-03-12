@@ -4,7 +4,7 @@
   "main": "node_modules/@prisma/client/index.js",
   "types": "node_modules/@prisma/client/index.d.ts",
   "scripts": {
-    "build": "npx prisma generate --schema=../../apps/api-server/prisma/schema.prisma"
+    "build": "npx prisma generate --schema=../../api-server/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1"
