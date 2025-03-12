@@ -1,0 +1,29 @@
+{
+  "name": "headless-gamify-monorepo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "api-server",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "yarn workspace @headless-gamify/api-server start",
+    "dev": "yarn workspace @headless-gamify/api-server dev",
+    "build": "yarn workspace @headless-gamify/api-server build",
+    "test": "yarn workspaces foreach -p run test",
+    "lint": "yarn workspaces foreach -p run lint",
+    "prisma:migrate:dev": "yarn workspace @headless-gamify/api-server prisma:migrate:dev",
+    "build:packages": "yarn workspace @headless-gamify/common build",
+    "prisma:generate": "yarn workspace @headless-gamify/api-server prisma:generate"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "prisma": "^6.4.1",
+    "prettier": "^3.5.2"
+  }
+}

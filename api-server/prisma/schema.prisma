@@ -1,0 +1,196 @@
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../packages/prisma-client/node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id       String   @id @default(uuid())
+  metadata Json     @default("{}")
+  users    User[]
+  teams    Team[]
+  // challenges Challenge[]
+  badges   Badge[]
+  metrics  Metric[]
+  objectives  Objective[]
+  // rewards  Reward[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id          String     @id @default(uuid())
+  xp          Int        @default(0)
+  level       Int        @default(1)
+
+  companyId   String
+  company     Company    @relation(fields: [companyId], references: [id])
+  
+  // all objectives that is related to the user
+  objectiveTracker ObjectiveTracker[]
+  
+  // Badges earned by the user
+  // earnedBadges  EarnedBadge[]
+
+  teams       Team[]     @relation("TeamMembers")
+  // all objectives that the user participate in 
+  objectives  Objective[] @relation("ObjectiveUsers")
+ 
+  metadata    Json       @default("{}")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt  
+  isDeleted  Boolean  @default(false)
+  @@index([companyId])
+}
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  xp          Int      @default(0)
+
+  // all objectives (goals) that the team in.
+  
+  objectives  Objective[]
+  
+  // leaderboards Leaderboard[] @relation("LeaderboardTeams")
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  members     User[]   @relation("TeamMembers")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted  Boolean  @default(false)
+  @@unique([name, companyId])
+  @@index([companyId])
+}
+model Metric {
+  id         String  @id @default(uuid())
+  name       String
+  description String?
+  companyId  String
+
+  // wight of the metric
+  // could be `open app` gain 1xp
+  // could be `do sale` gain 20xp & so on
+  defaultGainXP Int @default(1) 
+  company    Company @relation(fields: [companyId], references: [id])
+  objectives Objective[]
+  metadata   Json    @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isDeleted  Boolean  @default(false)
+  //
+  condition Condition[]
+  
+  @@unique([name, companyId])
+  @@index([companyId])
+}
+model Objective {
+  id             String   @id @default(uuid())
+  // Reach 100K in sales...
+  name           String
+  // 
+  description    String?
+
+  startDate      DateTime
+
+  endDate        DateTime
+  // `sales`, `task completed` or any thing that could be metric
+  metric         Metric  @relation(fields: [metricId], references: [id])
+  metricId       String
+  
+  // how much & should always be positive number
+  targetValue    Int
+
+  // when this objective reach 100% how much reward xp (points)
+  rewardXp       Int
+
+  // track each user progress in this objective
+  objectiveTracker ObjectiveTracker[]
+
+  // should be `solo` or `team`
+  type           String @default("solo")
+
+  //  the object could be related to a team
+  team           Team?    @relation(fields: [teamId], references: [id])
+  teamId         String?
+  // all participants
+  users          User[]    @relation("ObjectiveUsers")
+
+  company        Company @relation(fields: [companyId], references: [id])
+  companyId      String
+
+  metadata       Json    @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  isDeleted      Boolean  @default(false)
+  @@index([companyId])
+}
+
+model ObjectiveTracker {
+      id         String   @id @default(uuid())
+      
+      userId     String
+      user       User     @relation(fields: [userId], references: [id])
+      
+      objectiveId String
+      objective  Objective @relation(fields: [objectiveId], references: [id])
+
+      // how much (no in percent)
+      progress   Int       @default(0)
+      completed  Boolean   @default(false)
+      
+      completedAt DateTime?
+
+      isDeleted  Boolean  @default(false)
+      
+      createdAt  DateTime  @default(now())
+      updatedAt  DateTime  @updatedAt
+}
+
+model Badge {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  icon          String?
+  conditions    Condition[] // Relation to conditions
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
+  
+  metadata       Json    @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  isDeleted      Boolean  @default(false)
+
+  @@unique([name, companyId])
+}
+
+model Condition {
+  id         String       @id @default(uuid())
+  
+  // firstEvent, conditional.
+  type          String
+  
+  metricId     String
+  metric       Metric        @relation(fields: [metricId], references: [id])
+  
+  // all operators: 'gte', 'lte', 'eq', 'gt', 'lt'
+  operator     String
+  value        Int?
+
+  badgeId      String
+  badge        Badge        @relation(fields: [badgeId], references: [id])
+
+  priority     Int          // Priority for resolving multiple conditions
+  
+  metadata       Json    @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  isDeleted      Boolean  @default(false)
+}

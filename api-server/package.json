@@ -1,0 +1,32 @@
+{
+  "name": "@headless-gamify/api-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node ./dist/index.js",
+    "prisma:migrate:dev": "npx prisma migrate dev",
+    "prisma:migrate:deploy": "npx prisma migrate deploy",
+    "prisma:generate": "npx prisma generate --schema=prisma/schema.prisma && yarn workspace @headless-gamify/prisma-client build",
+    "postinstall": "yarn prisma:generate",
+    "seed": "tsx prisma/seed.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@hono/zod-validator": "^0.4.3",
+    "dotenv": "^16.4.7",
+    "hono": "^4.7.2",
+    "zod": "^3.24.2",
+    "@headless-gamify/prisma-client": "*",
+    "@headless-gamify/common": "*"
+  },
+  "devDependencies": {
+    "@types/node": "18",
+    "prettier": "^3.5.2",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

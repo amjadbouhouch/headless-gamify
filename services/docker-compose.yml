@@ -1,0 +1,15 @@
+name: headless-gamify
+version: '3.8'
+services:
+   postgres:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=johndoe
+      - POSTGRES_PASSWORD=randompassword
+    ports:
+      - '5432:5432'
+    volumes:
+      - headless-gamify-2:/var/lib/postgresql/data
+volumes:
+  headless-gamify-2:

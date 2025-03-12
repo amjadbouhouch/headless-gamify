@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ESNext", // Modern JavaScript features
+    "module": "CommonJS", // Use CommonJS for Node.js compatibility
+    "moduleResolution": "Node", // Use Node.js module resolution
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Enable ES module interop
+    "skipLibCheck": true, // Skip type-checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "baseUrl": "."
+  }
+}

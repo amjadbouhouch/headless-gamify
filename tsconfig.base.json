@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",              // Modern JavaScript features
+      "module": "CommonJS",            // Use CommonJS for Node.js compatibility
+      "moduleResolution": "Node",  // Use Node.js module resolution
+      "strict": true,
+      "outDir": "${configDir}/dist",                  // Enable all strict type-checking options
+      "esModuleInterop": true,         // Enable ES module interop
+      "skipLibCheck": true,            // Skip type-checking of declaration files
+      "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+      "baseUrl": "."
+    },
+    "include": [
+      "${configDir}/src/**/*.ts"
+    ], // Include all apps and packages
+    "exclude": ["${configDir}/node_modules", "${configDir}/dist"]        // Exclude node_modules
+  }
