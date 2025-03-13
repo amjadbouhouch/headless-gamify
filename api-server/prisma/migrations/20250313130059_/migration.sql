@@ -12,6 +12,7 @@ CREATE TABLE "Company" (
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "xp" INTEGER NOT NULL DEFAULT 0,
+    "usedXp" INTEGER NOT NULL DEFAULT 0,
     "level" INTEGER NOT NULL DEFAULT 1,
     "companyId" TEXT NOT NULL,
     "metadata" JSONB NOT NULL DEFAULT '{}',
@@ -120,6 +121,39 @@ CREATE TABLE "Condition" (
 );
 
 -- CreateTable
+CREATE TABLE "UserReward" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "rewardId" TEXT NOT NULL,
+    "claimedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL DEFAULT 'claimed',
+    "usedAt" TIMESTAMP(3),
+    "metadata" JSONB NOT NULL DEFAULT '{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "UserReward_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Reward" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "xpThreshold" INTEGER NOT NULL,
+    "quantity" INTEGER NOT NULL DEFAULT 1,
+    "expiresAt" TIMESTAMP(3),
+    "companyId" TEXT NOT NULL,
+    "metadata" JSONB NOT NULL DEFAULT '{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Reward_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_TeamMembers" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -155,6 +189,24 @@ CREATE INDEX "Objective_companyId_idx" ON "Objective"("companyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Badge_name_companyId_key" ON "Badge"("name", "companyId");
+
+-- CreateIndex
+CREATE INDEX "UserReward_userId_idx" ON "UserReward"("userId");
+
+-- CreateIndex
+CREATE INDEX "UserReward_rewardId_idx" ON "UserReward"("rewardId");
+
+-- CreateIndex
+CREATE INDEX "UserReward_status_idx" ON "UserReward"("status");
+
+-- CreateIndex
+CREATE INDEX "UserReward_claimedAt_idx" ON "UserReward"("claimedAt");
+
+-- CreateIndex
+CREATE INDEX "Reward_companyId_idx" ON "Reward"("companyId");
+
+-- CreateIndex
+CREATE INDEX "Reward_xpThreshold_idx" ON "Reward"("xpThreshold");
 
 -- CreateIndex
 CREATE INDEX "_TeamMembers_B_index" ON "_TeamMembers"("B");
@@ -194,6 +246,15 @@ ALTER TABLE "Condition" ADD CONSTRAINT "Condition_metricId_fkey" FOREIGN KEY ("m
 
 -- AddForeignKey
 ALTER TABLE "Condition" ADD CONSTRAINT "Condition_badgeId_fkey" FOREIGN KEY ("badgeId") REFERENCES "Badge"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserReward" ADD CONSTRAINT "UserReward_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserReward" ADD CONSTRAINT "UserReward_rewardId_fkey" FOREIGN KEY ("rewardId") REFERENCES "Reward"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Reward" ADD CONSTRAINT "Reward_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_TeamMembers" ADD CONSTRAINT "_TeamMembers_A_fkey" FOREIGN KEY ("A") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;

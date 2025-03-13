@@ -19,7 +19,7 @@ model Company {
   badges   Badge[]
   metrics  Metric[]
   objectives  Objective[]
-  // rewards  Reward[]
+  rewards  Reward[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -27,6 +27,8 @@ model Company {
 model User {
   id          String     @id @default(uuid())
   xp          Int        @default(0)
+  // or converted XP to rewards
+  usedXp      Int        @default(0)
   level       Int        @default(1)
 
   companyId   String
@@ -37,6 +39,9 @@ model User {
   
   // Badges earned by the user
   // earnedBadges  EarnedBadge[]
+  
+  // User's claimed rewards
+  userRewards UserReward[]
 
   teams       Team[]     @relation("TeamMembers")
   // all objectives that the user participate in 
@@ -193,4 +198,76 @@ model Condition {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   isDeleted      Boolean  @default(false)
+}
+
+model UserReward {
+  id            String   @id @default(uuid())
+  
+  // User who claimed this reward
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  // The reward that was claimed
+  rewardId      String
+  reward        Reward   @relation(fields: [rewardId], references: [id])
+  
+  // When the reward was claimed
+  claimedAt     DateTime @default(now())
+  
+  // Status of the claimed reward:
+  // - 'claimed': Initial state when user claims the reward
+  // - 'used': Reward has been redeemed/consumed by the user
+  // - 'expired': Reward is no longer valid due to time limit
+  // - 'cancelled': Reward claim was cancelled/revoked
+  // - 'pending': Reward claim is awaiting approval
+  status        String   @default("claimed")
+  
+  // When the reward was used (if applicable)
+  usedAt        DateTime?
+  
+  // Custom data for this specific claimed reward
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+  
+  @@index([userId])
+  @@index([rewardId])
+  @@index([status])
+  @@index([claimedAt])
+}
+
+model Reward {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  
+  // The type of reward (e.g., 'xp_milestone', 'achievement', 'special')
+  // type          String
+  
+  // XP threshold required to earn this reward
+  xpThreshold   Int
+  
+  // Available quantity of this reward
+  quantity      Int      @default(1)
+  
+  // If the reward has an expiration date
+  expiresAt     DateTime?
+  
+  // Instances of this reward claimed by users
+  userRewards   UserReward[]
+  
+  // Company that created the reward
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
+  
+  // Custom data for the reward
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+  
+  @@index([companyId])
+  // @@index([type])
+  @@index([xpThreshold])
 }

@@ -88,7 +88,7 @@ export namespace badgeService {
   };
   export async function update({ company, id, payload }: UpdateArgs) {
     const badge = await retrieve({ company, id });
-    assertHelper.assertExist(badge, 'Badge not found');
+    assertHelper.assertNotFound(badge, 'Badge not found');
     return prisma.badge.update({
       where: {
         id,

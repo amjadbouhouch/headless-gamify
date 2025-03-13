@@ -26,7 +26,7 @@ export namespace conditionService {
       },
     });
 
-    assertHelper.assertExist(condition, 'Condition not found');
+    assertHelper.assertNotFound(condition, 'Condition not found');
 
     return prisma.condition.update({
       where: {

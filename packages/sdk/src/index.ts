@@ -5,6 +5,7 @@ import TeamService from './services/TeamService';
 import ObjectiveService from './services/ObjectiveService';
 import BadgeService from './services/BadgeService';
 import ConditionService from './services/ConditionService';
+import RewardService from './services/RewardService';
 
 export type HeadlessGamifyProps = {
   API_BASE_URL: string;
@@ -19,6 +20,7 @@ export class HeadlessGamify {
   objectives: ObjectiveService;
   badges: BadgeService;
   conditions: ConditionService;
+  rewards: RewardService;
   constructor(props: HeadlessGamifyProps) {
     if (!props.API_BASE_URL) throw new Error('API_BASE_URL is required');
     if (!props.API_KEY) throw new Error('API_KEY is required');
@@ -35,5 +37,6 @@ export class HeadlessGamify {
     this.objectives = new ObjectiveService(this.instance);
     this.badges = new BadgeService(this.instance);
     this.conditions = new ConditionService(this.instance);
+    this.rewards = new RewardService(this.instance);
   }
 }

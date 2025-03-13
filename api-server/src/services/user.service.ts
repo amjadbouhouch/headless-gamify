@@ -113,9 +113,9 @@ export namespace userService {
     assertHelper.assertBadRequest(value > 0, 'Value must be greater than 0');
 
     const user = await retrieve({ company, id: userId });
-    assertHelper.assertExist(user, 'User not found');
+    assertHelper.assertNotFound(user, 'User not found');
     const metric = await metricService.retrieve({ company, id: metricId });
-    assertHelper.assertExist(metric, 'Metric not found');
+    assertHelper.assertNotFound(metric, 'Metric not found');
 
     await prisma.$transaction(async (tx) => {
       const objectives = await tx.objective.findMany({

@@ -10,6 +10,7 @@ import { teamRoutes } from './routes/team.route';
 import { objectiveRoutes } from './routes/objective.route';
 import { badgeRoutes } from './routes/badge.route';
 import { conditionRoutes } from './routes/condition.route';
+import { rewardRoutes } from './routes/reward.route';
 
 export function createServer() {
   const app = new Hono();
@@ -27,6 +28,7 @@ export function createServer() {
   app.route('/objectives', objectiveRoutes);
   app.route('/badges', badgeRoutes);
   app.route('/conditions', conditionRoutes);
+  app.route('/rewards', rewardRoutes);
   // END ROUTES
 
   // Not found handler
