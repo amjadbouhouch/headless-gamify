@@ -60,4 +60,21 @@ metricRoutes.delete('/:id', middlewares.verifyApiKey, async (c) => {
   return c.json({}, 200);
 });
 
+// New route to get user metric history
+metricRoutes.get('/user/:userId/history', middlewares.verifyApiKey, validateCommonQuery, async (c) => {
+  const company = c.get('company');
+  const userId = c.req.param('userId');
+  const queries = await c.req.valid('query');
+  const metricId = c.req.query('metricId'); // Optional query parameter for filtering by metric
+  
+  const res = await metricService.getUserMetricHistory({
+    company,
+    userId,
+    metricId,
+    ...queries,
+  });
+  
+  return c.json(res);
+});
+
 export { metricRoutes };

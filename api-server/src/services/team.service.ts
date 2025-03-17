@@ -16,7 +16,11 @@ export namespace teamService {
     const items = await prisma.team.findMany({
       where,
       include: {
-        members: true,
+        members: {
+          where: {
+            isDeleted: false,
+          },
+        },
       },
       skip: (rest.page - 1) * rest.limit,
       take: rest.limit,
@@ -55,23 +59,54 @@ export namespace teamService {
         },
       },
       include: {
-        members: true,
+        members: {
+          where: {
+            isDeleted: false,
+          },
+        },
       },
     });
   }
 
   export type CreateArgs = Prisma.TeamCreateInput;
-  export function create(payload: CreateArgs) {
-    const createUser = prisma.team.create({
+  export async function create(payload: CreateArgs) {
+    const team = await prisma.team.findFirst({
+      where: {
+        name: payload.name,
+      },
+    });
+    if (team && team.isDeleted) {
+      return prisma.team.update({
+        where: {
+          id: team.id,
+        },
+        data: {
+          ...payload,
+          isDeleted: false,
+        },
+        include: {
+          members: {
+            where: {
+              isDeleted: false,
+            },
+          },
+        },
+      });
+    }
+    const created = prisma.team.create({
       data: {
         ...payload,
       },
       include: {
-        members: true,
+        members: {
+          where: {
+            isDeleted: false,
+          },
+        },
       },
     });
     //  TODO here
-    return createUser;
+    return created;
   }
 
   export type UpdateArgs = {
@@ -91,7 +126,11 @@ export namespace teamService {
         ...payload,
       },
       include: {
-        members: true,
+        members: {
+          where: {
+            isDeleted: false,
+          },
+        },
       },
     });
   }

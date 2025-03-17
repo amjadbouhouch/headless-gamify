@@ -6,3 +6,4 @@ export * as objectiveValidator from './objective.validator';
 export * from './badge.validator';
 export * from './condition.validator';
 export * from './reward.validator';
+export * from './challenge.validator';

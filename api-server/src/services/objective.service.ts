@@ -24,6 +24,9 @@ export namespace objectiveService {
   export async function list({ company, ...rest }: ListArgs) {
     const where: NonNullable<Parameters<typeof prisma.objective.findMany>[0]>['where'] = {
       companyId: company.id,
+      AND: {
+        isDeleted: false,
+      },
     };
 
     const items = await prisma.objective.findMany({

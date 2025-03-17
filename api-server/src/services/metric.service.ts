@@ -103,4 +103,52 @@ export namespace metricService {
       },
     });
   }
+
+  // New function to get user metric history
+  export type GetUserMetricHistoryArgs = CommonQueryParams & {
+    company: Company;
+    userId: string;
+    metricId?: string;
+  };
+
+  export async function getUserMetricHistory({ company, userId, metricId, ...rest }: GetUserMetricHistoryArgs) {
+    const where: Prisma.MetricHistoryWhereInput = {
+      userId,
+      isDeleted: false,
+      metric: {
+        companyId: company.id,
+        isDeleted: false,
+      },
+    };
+
+    // Add metricId filter if provided
+    if (metricId) {
+      where.metricId = metricId;
+    }
+
+    const items = await prisma.metricHistory.findMany({
+      where,
+      include: {
+        metric: true, // Include the metric details
+      },
+      skip: (rest.page - 1) * rest.limit,
+      take: rest.limit,
+      orderBy: {
+        [rest.sorter]: rest.direction,
+      },
+    });
+
+    const total = await prisma.metricHistory.count({
+      where,
+    });
+
+    const response = commonHelper.getPaginationFields({
+      totalDocs: total,
+      docs: items,
+      limit: rest.limit,
+      page: rest.page,
+    });
+
+    return response;
+  }
 }

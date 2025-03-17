@@ -9,6 +9,7 @@
   "private": true,
   "workspaces": [
     "api-server",
+    "website",
     "packages/*"
   ],
   "scripts": {
@@ -18,7 +19,7 @@
     "test": "yarn workspaces foreach -p run test",
     "lint": "yarn workspaces foreach -p run lint",
     "prisma:migrate:dev": "yarn workspace @headless-gamify/api-server prisma:migrate:dev",
-    "build:packages": "yarn workspace @headless-gamify/common build",
+    "build:packages": "yarn workspace @headless-gamify/common build && yarn workspace @headless-gamify/sdk build",
     "prisma:generate": "yarn workspace @headless-gamify/api-server prisma:generate",
     "clean": "rm -rf node_modules && rm -rf packages/*/node_modules && rm -rf api-server/node_modules"
   },

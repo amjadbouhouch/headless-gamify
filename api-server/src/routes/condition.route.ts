@@ -3,7 +3,6 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { middlewares } from 'src/middlewares';
 import { conditionService } from 'src/services/condition.service';
-import { assertHelper } from 'src/utils/assert.helper';
 
 const conditionRoutes = new Hono();
 

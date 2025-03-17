@@ -118,6 +118,25 @@ export namespace userService {
     assertHelper.assertNotFound(metric, 'Metric not found');
 
     await prisma.$transaction(async (tx) => {
+      // Check if this is the first time the user increments this metric
+      const isFirstEvent =
+        (await tx.metricHistory.count({
+          where: {
+            userId,
+            metricId,
+            isDeleted: false,
+          },
+        })) === 0;
+
+      // Record the metric history
+      await tx.metricHistory.create({
+        data: {
+          userId,
+          metricId,
+          value,
+        },
+      });
+
       const objectives = await tx.objective.findMany({
         where: {
           metricId,
@@ -144,17 +163,93 @@ export namespace userService {
         totalXpGain += rewardedXP;
       }
       // step 3: update user xp
-      return tx.user.update({
+      await tx.user.update({
         where: {
           id: userId,
         },
         data: {
-          //
           xp: { increment: totalXpGain },
-          //
           level: commonHelper.getCurrentLevel(user.xp + totalXpGain),
         },
       });
+
+      // Step 4: Check and award badges based on conditions
+      const badges = await tx.badge.findMany({
+        where: {
+          companyId: company.id,
+          isDeleted: false,
+          conditions: {
+            some: {
+              metricId,
+              isDeleted: false,
+            },
+          },
+        },
+        include: {
+          conditions: {
+            where: {
+              isDeleted: false,
+            },
+            orderBy: {
+              priority: 'asc',
+            },
+          },
+          earnedBadges: {
+            where: {
+              userId,
+              isDeleted: false,
+            },
+          },
+        },
+      });
+
+      for (const badge of badges) {
+        // Skip if user already has non-reusable badge
+        if (!badge.reusable && badge.earnedBadges.length > 0) continue;
+
+        // Process each condition individually instead of requiring all conditions to be met
+        for (const condition of badge.conditions) {
+          let conditionMet = false;
+
+          // Check condition type
+          if (condition.type === 'firstEvent') {
+            conditionMet = isFirstEvent;
+          } else if (condition.type === 'conditional' && condition.value) {
+            // For conditional type, check the operator and value
+            switch (condition.operator) {
+              case 'gte':
+                conditionMet = value >= condition.value;
+                break;
+              case 'lte':
+                conditionMet = value <= condition.value;
+                break;
+              case 'eq':
+                conditionMet = value === condition.value;
+                break;
+              case 'gt':
+                conditionMet = value > condition.value;
+                break;
+              case 'lt':
+                conditionMet = value < condition.value;
+                break;
+              default:
+                conditionMet = false;
+            }
+          }
+
+          // If condition is met, award the badge and break the loop
+          if (conditionMet) {
+            await tx.earnedBadge.create({
+              data: {
+                userId,
+                badgeId: badge.id,
+              },
+            });
+            // Break after awarding the badge once for this metric increment
+            break;
+          }
+        }
+      }
     });
   }
 }

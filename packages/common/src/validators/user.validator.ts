@@ -14,9 +14,6 @@ export const create = z.object({
     })
     .default(1)
     .optional(),
-  // badges: z.array(z.string()).optional().default([]), // Array of badge IDs, default is empty array
-  // challenges: z.array(z.string()).optional().default([]), // Array of challenge IDs, default is empty array
-  streaks: z.number().optional().default(0),
   lastActivity: z
     .string({
       invalid_type_error: 'Last activity must be a valid date',
