@@ -1,6 +1,6 @@
 # Headless Gamify
 
-A flexible and modular gamification system that can be integrated into any application.
+Headless Gamify is a flexible and modular gamification system designed for seamless integration into various applications. This particular server is tailored for the retail industry, with a primary focus on enhancing employee engagement and motivation. By leveraging gamification techniques, it aims to create a more stimulating and rewarding work environment, ultimately boosting productivity and job satisfaction.
 
 ## Project Structure
 

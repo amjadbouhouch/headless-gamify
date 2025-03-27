@@ -111,6 +111,7 @@ export namespace userService {
   };
   export async function incrementMetric({ company, metricId, payload: { value }, userId }: IncrementMetricArgs) {
     assertHelper.assertBadRequest(value > 0, 'Value must be greater than 0');
+    assertHelper.assertBadRequest(!isNaN(value), 'Value must be a number');
 
     const user = await retrieve({ company, id: userId });
     assertHelper.assertNotFound(user, 'User not found');
@@ -119,14 +120,15 @@ export namespace userService {
 
     await prisma.$transaction(async (tx) => {
       // Check if this is the first time the user increments this metric
-      const isFirstEvent =
-        (await tx.metricHistory.count({
-          where: {
-            userId,
-            metricId,
-            isDeleted: false,
-          },
-        })) === 0;
+      const existingMetricHistory = await tx.metricHistory.findFirst({
+        where: {
+          userId,
+          metricId,
+          isDeleted: false,
+        },
+      });
+
+      const isFirstEvent = !existingMetricHistory;
 
       // Record the metric history
       await tx.metricHistory.create({

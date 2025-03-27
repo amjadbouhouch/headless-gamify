@@ -41,26 +41,28 @@ export namespace objectiveHelper {
 
   // returns rewardXP if completed or 0 if not
   export async function incrementObjectiveTracker({ objective, tx, value }: IncrementObjectiveTrackerType) {
-    const objectiveTracker = objective.objectiveTracker[0];
-    if (!objectiveTracker) {
-      return 0;
+    let totalRewardedXP = 0;
+    for (const objectiveTracker of objective.objectiveTracker) {
+      if (!objectiveTracker) {
+        continue;
+      }
+      const isAlreadyCompleted = objectiveTracker.completed;
+      const progress = objectiveTracker.progress + value;
+      const isCompleted = progress >= objective.targetValue;
+      await tx.objectiveTracker.update({
+        where: {
+          id: objectiveTracker.id,
+        },
+        data: {
+          progress,
+          completed: isCompleted,
+          completedAt: isAlreadyCompleted ? undefined : isCompleted ? new Date() : null,
+        },
+      });
+      if (isCompleted && !isAlreadyCompleted) {
+        totalRewardedXP += objective.rewardXp;
+      }
     }
-    const isAlreadyCompleted = objectiveTracker.completed;
-    const progress = objectiveTracker.progress + value;
-    const isCompleted = progress >= objective.targetValue;
-    await tx.objectiveTracker.update({
-      where: {
-        id: objectiveTracker.id,
-      },
-      data: {
-        progress,
-        completed: isCompleted,
-        completedAt: isAlreadyCompleted ? undefined : isCompleted ? new Date() : null,
-      },
-    });
-    if (isCompleted && !isAlreadyCompleted) {
-      return objective.rewardXp;
-    }
-    return 0;
+    return totalRewardedXP;
   }
 }
